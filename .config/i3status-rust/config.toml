@@ -1,0 +1,46 @@
+theme = "gruvbox-dark"
+icons = "awesome"
+
+
+[[block]]
+block = "cpu"
+interval = 1
+[block.theme_overrides]
+idle_bg = "#458588"
+idle_fg = "#ebd9a7"
+
+[[block]]
+block = "networkmanager"
+ap_format = "{strength}"
+device_format = "{icon}{ap} | {ips}"
+[block.theme_overrides]
+good_bg = "#b16286"
+[[block]]
+block = "memory"
+display_type = "memory"
+format_mem = "{mem_used_percents}"
+format_swap = "{swap_used_percents}"
+[block.theme_overrides]
+idle_bg = "#cc241d"
+idle_fg = "#ebd9a7"
+
+[[block]]
+block = "music"
+player = "cmus"
+dynamic_width = true 
+marquee_speed = 0.3
+[block.theme_overrides]
+idle_bg = "#86672d"
+info_bg = "#d79921"
+
+[[block]]
+block = "sound"
+[block.theme_overrides]
+idle_bg = "#98971a"
+
+[[block]]
+block = "time"
+interval = 5
+format = "%a %m/%d/%y %R"
+
+
