@@ -228,7 +228,6 @@ smart_gaps on
 
 exec --no-startup-id firefox
 exec --no-startup-id alacritty
-exec --no-startup-id alacritty; cmus
 exec --no-startup-id signal-desktop
 exec --no-startup-id picom --config /home/derik/.config/picom/picom.conf 
 exec --no-startup-id feh --bg-scale /usr/share/backgrounds/archlinux/awesome.png 
