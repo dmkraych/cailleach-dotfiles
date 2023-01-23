@@ -1,5 +1,5 @@
 theme = "gruvbox-dark"
-icons = "awesome5"
+icons = "awesome"
 
 
 [[block]]
@@ -15,6 +15,7 @@ ap_format = "{strength}"
 device_format = "{icon}{ap} | {ips}"
 [block.theme_overrides]
 good_bg = "#b16286"
+
 [[block]]
 block = "memory"
 display_type = "memory"
@@ -23,6 +24,8 @@ format_swap = "{swap_used_percents}"
 [block.theme_overrides]
 idle_bg = "#cc241d"
 idle_fg = "#ebd9a7"
+[block.icons_overrides]
+memory_mem=""
 
 [[block]]
 block = "music"
