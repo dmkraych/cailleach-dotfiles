@@ -32,7 +32,7 @@ from libqtile.lazy import lazy
 from libqtile.log_utils import logger
 
 from qtile_extras import widget 
-from qtile_extras.widget.decorations import BorderDecoration, PowerLineDecoration
+from qtile_extras.widget.decorations import BorderDecoration, PowerLineDecoration, RectDecoration
 
 mod = "mod1"
 terminal = "alacritty" 
@@ -82,32 +82,41 @@ keys = [
     Key([mod], "r", lazy.spawncmd(), desc="Spawn a command using a prompt widget"),
 ]
 
-groups = [Group(i) for i in "asdfuiop"]
+groups = [Group("  "),
+          Group(" "),
+          Group("  ")
+          
+]
 
-for i in groups:
-    keys.extend(
-        [
-            # mod1 + letter of group = switch to group
-            Key(
-                [mod],
-                i.name,
-                lazy.group[i.name].toscreen(),
-                desc="Switch to group {}".format(i.name),
-            ),
-            # mod1 + shift + letter of group = switch to & move focused window to group
-            Key(
-                [mod, "shift"],
-                i.name,
-                lazy.window.togroup(i.name, switch_group=True),
-                desc="Switch to & move focused window to group {}".format(i.name),
-            ),
+from libqtile.dgroups import simple_key_binder
+dgroups_key_binder = simple_key_binder("mod4")
 
-            # Or, use below if you prefer not to switch to that group.
-            # # mod1 + shift + letter of group = move focused window to group
-            # Key([mod, "shift"], i.name, lazy.window.togroup(i.name),
-            #     desc="move focused window to group {}".format(i.name)),
-        ]
-   )
+# groups = [Group(i) for i in "asdfuiop"]
+# 
+# for i in groups:
+#     keys.extend(
+#         [
+#             # mod1 + letter of group = switch to group
+#             Key(
+#                 [mod],
+#                 i.name,
+#                 lazy.group[i.name].toscreen(),
+#                 desc="Switch to group {}".format(i.name),
+#             ),
+#             # mod1 + shift + letter of group = switch to & move focused window to group
+#             Key(
+#                 [mod, "shift"],
+#                 i.name,
+#                 lazy.window.togroup(i.name, switch_group=True),
+#                 desc="Switch to & move focused window to group {}".format(i.name),
+#             ),
+# 
+#             # Or, use below if you prefer not to switch to that group.
+#             # # mod1 + shift + letter of group = move focused window to group
+#             # Key([mod, "shift"], i.name, lazy.window.togroup(i.name),
+#             #     desc="move focused window to group {}".format(i.name)),
+#         ]
+#    )
        
 groups.append( ScratchPad("scratchpad", [
         # define a drop down terminal.
@@ -169,6 +178,12 @@ powerline = {
         ]
 }
 
+rectDecoration = {
+        "decorations": [
+            RectDecoration(colour="004040", radius=10, filled=True, padding_y=3, group=False)
+            ],
+        "padding": 10,
+        }
 screens = [
     Screen(
         top=bar.Bar(
@@ -190,8 +205,8 @@ screens = [
                        fontsize = 12,
                        margin_y = 3,
                        margin_x = 0,
-                       padding_y = 5,
-                       padding_x = 3,
+                       #padding_y = 5,
+                       # padding_x = 3,
                        borderwidth = 3,
                        active = colors[2],
                        inactive = colors[7],
@@ -204,7 +219,7 @@ screens = [
                        other_screen_border = colors[4],
                        foreground = colors[2],
                        background = colors[0],
-                        **powerline),
+                        **rectDecoration),
                 widget.Prompt(),
                 # NB Systray is incompatible with Wayland, consider using StatusNotifier instead
                 # widget.StatusNotifier(),
@@ -275,10 +290,11 @@ wl_input_rules = None
 
 @hook.subscribe.startup
 def start():
-#    qtile.cmd_spawn('picom', shell=True)
-    output = subprocess.check_output(
-            os.path.expanduser("~/.config/qtile/autostart.sh")
-            )
+#     qtile.cmd_spawn('picom', shell=True)
+    home = os.path.expanduser('~')
+    subprocess.call(
+            os.path.expanduser(home + "/.config/qtile/autostart.sh")
+                    )
 
 if __name__ == '__main__':
     main()
