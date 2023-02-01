@@ -141,13 +141,13 @@ layouts = [
     # layout.Tile(),
     # layout.TreeTab(),
     # layout.VerticalTile(),
-    layout.Zoomy(),
+    layout.Zoomy(**layout_theme),
 ]
 
 widget_defaults = dict(
     font="Mononoki Nerd Font",
     fontsize=12,
-    padding=3,
+    padding=3
 )
 extension_defaults = widget_defaults.copy()
 
@@ -174,10 +174,10 @@ screens = [
         top=bar.Bar(
             [
                 widget.WidgetBox(widgets=[
-                    widget.Wallpaper(directory='/usr/share/backgrounds/archlinux/',
-                                     scroll_hide=False,
-                                     random_selection=False,
-                                     background=colors[0]),
+#                    widget.Wallpaper(directory='/usr/share/backgrounds/archlinux/',
+#                                     scroll_hide=False,
+#                                     random_selection=False,
+#                                     background=colors[0]),
                     widget.CurrentLayoutIcon(background=colors[0],
                                              font = 'Mononoki Nerd Font',
                                              foreground=colors[2],
@@ -209,24 +209,26 @@ screens = [
                 # NB Systray is incompatible with Wayland, consider using StatusNotifier instead
                 # widget.StatusNotifier(),
                 widget.Spacer(length=bar.STRETCH,
-                              background = colors[0]),
+                              background = colors[0],
+                              **powerline),
                 widget.Systray(background = colors[0]),
                 widget.CPU(format='龍 {freq_current}GHz {load_percent}%',
-                           background = colors[0]),
+                           background = colors[5],
+                           **powerline),
                 widget.Net(format='直 {down} ↓↑ {up}',
-                           background = colors[0],
+                           background = colors[6],
                            interface='wlp4s0',
                            **powerline),
                 widget.Cmus(**powerline),
                 widget.PulseVolume(limit_max_volume=True,
-                                   background = colors[0],
+                                   background = colors[7],
                                    fmt='墳 {}',
                                    **powerline),
                 widget.Clock(format="%B %d %a %H:%M",
-                             background = colors[0],
+                             background = colors[8],
                              **powerline),
-                widget.QuickExit(background = colors[0],
-                                 **powerline), # to be removed after config is satisfactory
+                widget.QuickExit(background = colors[9]
+                                 ), # to be removed after config is satisfactory
 
             ],
             24,
@@ -273,10 +275,10 @@ wl_input_rules = None
 
 @hook.subscribe.startup
 def start():
-    qtile.cmd_spawn('picom', shell=True)
-#    output = subprocess.check_output(
-#            os.path.expanduser("~/.config/qtile/autostart.sh")
-#            )
+#    qtile.cmd_spawn('picom', shell=True)
+    output = subprocess.check_output(
+            os.path.expanduser("~/.config/qtile/autostart.sh")
+            )
 
 if __name__ == '__main__':
     main()
