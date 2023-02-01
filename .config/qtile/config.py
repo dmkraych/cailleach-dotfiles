@@ -24,10 +24,15 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
-from libqtile import bar, layout, widget
+import subprocess
+import os
+from libqtile import bar, layout, widget, hook, qtile
 from libqtile.config import Click, Drag, Group, Key, Match, Screen, ScratchPad, DropDown
 from libqtile.lazy import lazy
-from libqtile.utils import guess_terminal
+from libqtile.log_utils import logger
+
+from qtile_extras import widget 
+from qtile_extras.widget.decorations import BorderDecoration, PowerLineDecoration
 
 mod = "mod1"
 terminal = "alacritty" 
@@ -40,7 +45,7 @@ keys = [
     Key([mod], "l", lazy.layout.right(), desc="Move focus to right"),
     Key([mod], "j", lazy.layout.down(), desc="Move focus down"),
     Key([mod], "k", lazy.layout.up(), desc="Move focus up"),
-    Key([mod], "space", lazy.layout.next(), desc="Move window focus to other window"),
+    # Key([mod], "space", lazy.layout.next(), desc="Move window focus to other window"),
     # Move windows between left/right columns or move up/down in current stack.
     # Moving out of range in Columns layout will create new column.
     Key([mod, "shift"], "h", lazy.layout.shuffle_left(), desc="Move window to the left"),
@@ -55,6 +60,7 @@ keys = [
     Key([mod, "control"], "k", lazy.layout.grow_up(), desc="Grow window up"),
     Key([mod], "n", lazy.layout.normalize(), desc="Reset all window sizes"),
     Key([mod], "g", lazy.layout.grow(), desc="Grow current window"),
+    Key([mod, "control"], "f", lazy.window.toggle_fullscreen(), desc="Fullscreen to focused window"),
     # Toggle between split and unsplit sides of stack.
     # Split = all windows displayed
     # Unsplit = 1 window displayed, like Max layout, but still with
@@ -66,7 +72,7 @@ keys = [
         desc="Toggle between split and unsplit sides of stack",
     ),
     Key([mod], "Return", lazy.spawn(terminal), desc="Launchrterminal"),
-    Key([mod], "d", lazy.spawn("rofi -modi drun,window,run -show drun"), desc="Launch rofi"),
+    Key([mod], "space", lazy.spawn("rofi -modi drun,window,run -show drun"), desc="Launch rofi"),
     # Toggle between different layouts as defined below
     Key([mod], "Tab", lazy.next_layout(), desc="Toggle between layouts"),
     Key([mod], "w", lazy.window.kill(), desc="Kill focused window"),
@@ -76,7 +82,7 @@ keys = [
     Key([mod], "r", lazy.spawncmd(), desc="Spawn a command using a prompt widget"),
 ]
 
-groups = [Group(i) for i in "123456789"]
+groups = [Group(i) for i in "asdfuiop"]
 
 for i in groups:
     keys.extend(
@@ -106,60 +112,122 @@ for i in groups:
 groups.append( ScratchPad("scratchpad", [
         # define a drop down terminal.
         # it is placed in the upper third of screen by default.
-        DropDown("term", "alacritty --class=scratch", opacity=0.8, on_focus_lost_hide=True), ])
+        DropDown("term", "alacritty --class=scratch", opacity=0.9, on_focus_lost_hide=True) ],
+        single=True)
 )
 
 keys.extend([
-    Key([mod], "s", lazy.group['scratchpad'].dropdown_toggle('term')),
+    Key([mod, "control"], "p", lazy.group['scratchpad'].dropdown_toggle('term')),
     ],
     )
 
+layout_theme = {"border_width": 1,
+                "margin": 8,
+                "border_focus": "e1acff",
+                "border_normal": "1D2330"
+                }
+
 layouts = [
-    layout.Columns(border_focus_stack=["#d75f5f", "#8f3d3d"], border_width=4),
-    layout.Max(),
-    # Try more layouts by unleashing below layouts.
+    # Layouts uncommented in order of most common usage
+    # layout.Columns(border_focus_stack=["#d75f5f", "#8f3d3d"], border_width=4),
+    # layout.Max(),
     # layout.Stack(num_stacks=2),
-    layout.Bsp(),
+    # layout.Bsp(),
     # layout.Matrix(),
-    layout.MonadTall(),
     # layout.MonadWide(),
     # layout.RatioTile(),
+    layout.Spiral(main_pane="left", clockwise=True, new_client_position='bottom', **layout_theme),
+    layout.MonadTall(**layout_theme),
     # layout.Tile(),
     # layout.TreeTab(),
     # layout.VerticalTile(),
-    # layout.Zoomy(),
+    layout.Zoomy(),
 ]
 
 widget_defaults = dict(
-    font="sans",
+    font="Mononoki Nerd Font",
     fontsize=12,
     padding=3,
 )
 extension_defaults = widget_defaults.copy()
 
+
+colors = [["#282c34", "#282c34"],
+          ["#1c1f24", "#1c1f24"],
+          ["#dfdfdf", "#dfdfdf"],
+          ["#ff6c6b", "#ff6c6b"],
+          ["#98be65", "#98be65"],
+          ["#da8548", "#da8548"],
+          ["#51afef", "#51afef"],
+          ["#c678dd", "#c678dd"],
+          ["#46d9ff", "#46d9ff"],
+          ["#a9a1e1", "#a9a1e1"]]
+
+powerline = {
+        "decorations": [
+            PowerLineDecoration(path='zig_zag')
+        ]
+}
+
 screens = [
     Screen(
-        wallpaper = '/usr/share/backgrounds/archlinux/awesome.png', 
-        wallpaper_mode = 'fill',
-        bottom=bar.Bar(
+        top=bar.Bar(
             [
-                widget.CurrentLayout(),
-                widget.GroupBox(),
-                widget.Prompt(),
-                widget.WindowName(),
-                widget.Chord(
-                    chords_colors={
-                        "launch": ("#ff0000", "#ffffff"),
-                    },
-                    name_transform=lambda name: name.upper(),
+                widget.WidgetBox(widgets=[
+                    widget.Wallpaper(directory='/usr/share/backgrounds/archlinux/',
+                                     scroll_hide=False,
+                                     random_selection=False,
+                                     background=colors[0]),
+                    widget.CurrentLayoutIcon(background=colors[0],
+                                             font = 'Mononoki Nerd Font',
+                                             foreground=colors[2],
+                                             custom_icon_paths=[os.path.expanduser('~/.config/qtile/icons')]
+                                             )
+                    ],
+                                    background = colors[0]
                 ),
-                widget.TextBox("default config", name="default"),
-                widget.TextBox("Press &lt;M-r&gt; to spawn", foreground="#d75f5f"),
+                widget.GroupBox(font = "Ubuntu Bold",
+                       fontsize = 12,
+                       margin_y = 3,
+                       margin_x = 0,
+                       padding_y = 5,
+                       padding_x = 3,
+                       borderwidth = 3,
+                       active = colors[2],
+                       inactive = colors[7],
+                       rounded = False,
+                       highlight_color = colors[1],
+                       highlight_method = "line",
+                       this_current_screen_border = colors[6],
+                       this_screen_border = colors [4],
+                       other_current_screen_border = colors[6],
+                       other_screen_border = colors[4],
+                       foreground = colors[2],
+                       background = colors[0],
+                        **powerline),
+                widget.Prompt(),
                 # NB Systray is incompatible with Wayland, consider using StatusNotifier instead
                 # widget.StatusNotifier(),
-                widget.Systray(),
-                widget.Clock(format="%Y-%m-%d %a %I:%M %p"),
-                widget.QuickExit(),
+                widget.Spacer(length=bar.STRETCH,
+                              background = colors[0]),
+                widget.Systray(background = colors[0]),
+                widget.CPU(format='龍 {freq_current}GHz {load_percent}%',
+                           background = colors[0]),
+                widget.Net(format='直 {down} ↓↑ {up}',
+                           background = colors[0],
+                           interface='wlp4s0',
+                           **powerline),
+                widget.Cmus(**powerline),
+                widget.PulseVolume(limit_max_volume=True,
+                                   background = colors[0],
+                                   fmt='墳 {}',
+                                   **powerline),
+                widget.Clock(format="%B %d %a %H:%M",
+                             background = colors[0],
+                             **powerline),
+                widget.QuickExit(background = colors[0],
+                                 **powerline), # to be removed after config is satisfactory
+
             ],
             24,
             # border_width=[2, 0, 2, 0],  # Draw top and bottom borders
@@ -203,6 +271,17 @@ auto_minimize = True
 # When using the Wayland backend, this can be used to configure input devices.
 wl_input_rules = None
 
+@hook.subscribe.startup
+def start():
+    qtile.cmd_spawn('picom', shell=True)
+#    output = subprocess.check_output(
+#            os.path.expanduser("~/.config/qtile/autostart.sh")
+#            )
+
+if __name__ == '__main__':
+    main()
+
+
 # XXX: Gasp! We're lying here. In fact, nobody really uses or cares about this
 # string besides java UI toolkits; you can see several discussions on the
 # mailing lists, GitHub issues, and other WM documentation that suggest setting
@@ -211,4 +290,4 @@ wl_input_rules = None
 #
 # We choose LG3D to maximize irony: it is a 3D non-reparenting WM written in
 # java that happens to be on java's whitelist.
-wmname = "LG3D"
+wmname = "Qtile"
