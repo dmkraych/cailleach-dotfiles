@@ -1,7 +1,12 @@
 # Configuration for Alacritty, the GPU enhanced terminal emulator.
 
 # Import additional configuration files
-#
+import:
+ # uncomment the flavour you want below:
+ #  - ~/.config/alacritty/catppuccin/catppuccin-mocha.yml
+ #  - ~/.config/alacritty/catppuccin/catppuccin-macchiato.yml
+ #  - ~/.config/alacritty/catppuccin/catppuccin-frappe.yml
+   - ~/.config/alacritty/catppuccin/catppuccin-latte.yml
 # Imports are loaded in order, skipping all missing files, with the importing
 # file being loaded last. If a field is already present in a previous import, it
 # will be replaced.
@@ -276,7 +281,8 @@ schemes:
       magenta: '#8181a6'
       cyan:    '#87ceeb'
       white:   '#c1cdc1'
-colors: *sourcerer
+
+# colors: *sourcerer
     # Cursor colors
   #
   # Colors which should be used to draw the terminal cursor.

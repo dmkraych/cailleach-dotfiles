@@ -26,10 +26,11 @@
 
 import subprocess
 import os
-from libqtile import bar, layout, widget, hook, qtile
+from libqtile import bar, layout, widget, hook, qtile, dgroups
 from libqtile.config import Click, Drag, Group, Key, Match, Screen, ScratchPad, DropDown
 from libqtile.lazy import lazy
 from libqtile.log_utils import logger
+from libqtile.dgroups import simple_key_binder, DGroups
 
 from qtile_extras import widget 
 from qtile_extras.widget.decorations import BorderDecoration, PowerLineDecoration, RectDecoration
@@ -82,15 +83,51 @@ keys = [
     Key([mod], "r", lazy.spawncmd(), desc="Spawn a command using a prompt widget"),
 ]
 
-groups = [Group("  "),
+### Colors cribbed from Catpuccin
+# colors = [["#232634", "#292c3c"], # frappe Crust->Mantle
+#           ["#414559", "#51576d"], # frappe Surface0->Surface1
+#           ["#7287fd", "#1e66f5"], # latte Lavender->Blue
+#           ["#209fb5", "#04a5e5"], # latte Sapphire->Sky
+#           ["#179299", "#40a02b"], # latte Teal->Green
+#           ["#df8e1d", "#fe640b"], # latte Yellow->Peach
+#           ["#e64553", "#d20f39"], # latte Maroon->Red
+#           ["#8839ef", "#ea76cb"], # latte Mauve->Pink
+#           ["#dd7878", "#dc8a78"], # latte Flamingo->Rosewater
+#           ["#6c6f85", "#6c6f85"], # latte Subtext0
+#           ["#dce0e8", "#acb0be"]] # latte Crust->Surface2
+
+### Frappe-Latte Gradient
+colors = [["#232634", "#292c3c"], # frappe Crust->Mantle
+          ["#414559", "#51576d"], # frappe Surface0->Surface1
+          ["#7287fd", "#babbf1"], # Lavender 
+          ["#91d7e3", "#04a5e5"], # Sky
+          ["#179299", "#8bd5ca"], # Teal
+          ["#df8e1d", "#e5c890"], # Yellow
+          ["#fe640b", "#f5a97f"], # Peach
+          ["#e64553", "#ee99a0"], # Maroon
+          ["#d20f39", "#e78284"], # Red
+          ["#8839ef", "#c6a0f6"], # Mauve
+          ["#ea76cb", "#f4b8e4"], # Pink
+          ["#dd7878", "#eebebe"], # Flamingo
+          ["#dc8a78", "#f4dbd6"], # Rosewater
+          ["#6c6f85", "#6c6f85"], # latte Subtext0
+          ["#11111b", "#45475a"]] # latte Crust->Surface2
+
+
+
+# Create workspaces
+groups = [Group(" "),
           Group(" "),
-          Group("  ")
-          
-]
+          Group(" "),
+          Group("")]
 
-from libqtile.dgroups import simple_key_binder
-dgroups_key_binder = simple_key_binder("mod4")
 
+# Bind workspaces
+simple_keys = ['a', 's', 'd', 'f']
+dgroups_key_binder = simple_key_binder("mod1", keynames=simple_keys)
+dgroups = DGroups(qtile, groups, dgroups_key_binder)
+
+### Comment out above and uncomment below for 8-workspace basic setup
 # groups = [Group(i) for i in "asdfuiop"]
 # 
 # for i in groups:
@@ -118,7 +155,7 @@ dgroups_key_binder = simple_key_binder("mod4")
 #         ]
 #    )
        
-groups.append( ScratchPad("scratchpad", [
+groups.append(ScratchPad("scratchpad", [
         # define a drop down terminal.
         # it is placed in the upper third of screen by default.
         DropDown("term", "alacritty --class=scratch", opacity=0.9, on_focus_lost_hide=True) ],
@@ -132,8 +169,8 @@ keys.extend([
 
 layout_theme = {"border_width": 1,
                 "margin": 8,
-                "border_focus": "e1acff",
-                "border_normal": "1D2330"
+                "border_focus": colors[5],
+                "border_normal": colors[0] 
                 }
 
 layouts = [
@@ -154,33 +191,24 @@ layouts = [
 ]
 
 widget_defaults = dict(
-    font="Mononoki Nerd Font",
-    fontsize=12,
-    padding=3
+    font="Mononoki Nerd Font Bold",
+    fontsize=14,
+    padding=3,
+    foreground=colors[-1]
 )
 extension_defaults = widget_defaults.copy()
 
 
-colors = [["#282c34", "#282c34"],
-          ["#1c1f24", "#1c1f24"],
-          ["#dfdfdf", "#dfdfdf"],
-          ["#ff6c6b", "#ff6c6b"],
-          ["#98be65", "#98be65"],
-          ["#da8548", "#da8548"],
-          ["#51afef", "#51afef"],
-          ["#c678dd", "#c678dd"],
-          ["#46d9ff", "#46d9ff"],
-          ["#a9a1e1", "#a9a1e1"]]
 
 powerline = {
         "decorations": [
-            PowerLineDecoration(path='zig_zag')
+            PowerLineDecoration(path='forward_slash')
         ]
 }
 
 rectDecoration = {
         "decorations": [
-            RectDecoration(colour="004040", radius=10, filled=True, padding_y=3, group=False)
+            RectDecoration(colour=colors[1], radius=5, filled=True, padding_y=3, group=False)
             ],
         "padding": 10,
         }
@@ -188,67 +216,74 @@ screens = [
     Screen(
         top=bar.Bar(
             [
-                widget.WidgetBox(widgets=[
-#                    widget.Wallpaper(directory='/usr/share/backgrounds/archlinux/',
-#                                     scroll_hide=False,
-#                                     random_selection=False,
-#                                     background=colors[0]),
-                    widget.CurrentLayoutIcon(background=colors[0],
-                                             font = 'Mononoki Nerd Font',
-                                             foreground=colors[2],
-                                             custom_icon_paths=[os.path.expanduser('~/.config/qtile/icons')]
-                                             )
-                    ],
-                                    background = colors[0]
-                ),
-                widget.GroupBox(font = "Ubuntu Bold",
-                       fontsize = 12,
-                       margin_y = 3,
-                       margin_x = 0,
-                       #padding_y = 5,
-                       # padding_x = 3,
-                       borderwidth = 3,
-                       active = colors[2],
-                       inactive = colors[7],
-                       rounded = False,
-                       highlight_color = colors[1],
-                       highlight_method = "line",
-                       this_current_screen_border = colors[6],
-                       this_screen_border = colors [4],
-                       other_current_screen_border = colors[6],
-                       other_screen_border = colors[4],
-                       foreground = colors[2],
-                       background = colors[0],
-                        **rectDecoration),
-                widget.Prompt(),
+                widget.Sep(background=colors[0], 
+                           foreground=colors[0], 
+                           linewidth=2, 
+                           size_percent = 100),
+                widget.Image(filename = '~/.config/qtile/icons/python-white.png',
+                             background=colors[0],
+                             scale=False,
+                             margin_y=3),
+                widget.Sep(background=colors[0], 
+                           foreground=colors[0], 
+                           linewidth=2, 
+                           size_percent = 100),
+                widget.GroupBox(font = "Mononoki Nerd Font Bold",
+                                fontsize = 16,
+                                fontshadow = colors[0],
+                                margin_y = 3,
+                                margin_x = 2,
+                                padding_x = 5,
+                                padding_y = 1.5,
+                                borderwidth = 3,
+                                active = colors[3],
+                                inactive = colors[3],
+                                rounded = True,
+                                highlight_color = colors[9],
+                                highlight_method = "block",
+                                this_current_screen_border = colors[9],
+                                this_screen_border = colors [9],
+                                other_current_screen_border = colors[8],
+                                other_screen_border = colors[0],
+                                foreground = colors[10],
+                                background = colors[0],
+                                **rectDecoration),
                 # NB Systray is incompatible with Wayland, consider using StatusNotifier instead
                 # widget.StatusNotifier(),
                 widget.Spacer(length=bar.STRETCH,
                               background = colors[0],
                               **powerline),
-                widget.Systray(background = colors[0]),
                 widget.CPU(format='龍 {freq_current}GHz {load_percent}%',
-                           background = colors[5],
+                           background = colors[6],
                            **powerline),
                 widget.Net(format='直 {down} ↓↑ {up}',
-                           background = colors[6],
+                           background = colors[7],
                            interface='wlp4s0',
+                           prefix = 'M',
                            **powerline),
-                widget.Cmus(**powerline),
+                widget.Cmus(# max_chars = 20,
+                            scroll = True,
+                            width = 150,
+                            scroll_interval = 0.04,
+                            scroll_delay = 3,
+                            play_color = colors[-1],
+                            background = colors[8],
+                            **powerline),
                 widget.PulseVolume(limit_max_volume=True,
-                                   background = colors[7],
+                                   background = colors[9],
                                    fmt='墳 {}',
                                    **powerline),
-                widget.Clock(format="%B %d %a %H:%M",
-                             background = colors[8],
-                             **powerline),
-                widget.QuickExit(background = colors[9]
-                                 ), # to be removed after config is satisfactory
+                widget.Clock(format="%a %B %d %H:%M",
+                             background = colors[10]
+                             ),
+                widget.Sep(background=colors[10], 
+                           foreground=colors[10], 
+                           linewidth=2, 
+                           size_percent = 100),
+#                 widget.QuickExit(background = colors[8]), # to be removed after config is satisfactory
 
             ],
-            24,
-            # border_width=[2, 0, 2, 0],  # Draw top and bottom borders
-            # border_color=["ff00ff", "000000", "ff00ff", "000000"]  # Borders are magenta
+            30,
         ),
     ),
 ]
@@ -260,7 +295,6 @@ mouse = [
     Click([mod], "Button2", lazy.window.bring_to_front()),
 ]
 
-dgroups_key_binder = None
 dgroups_app_rules = []  # type: list
 follow_mouse_focus = True
 bring_front_click = False
@@ -290,14 +324,10 @@ wl_input_rules = None
 
 @hook.subscribe.startup
 def start():
-#     qtile.cmd_spawn('picom', shell=True)
     home = os.path.expanduser('~')
     subprocess.call(
             os.path.expanduser(home + "/.config/qtile/autostart.sh")
                     )
-
-if __name__ == '__main__':
-    main()
 
 
 # XXX: Gasp! We're lying here. In fact, nobody really uses or cares about this
